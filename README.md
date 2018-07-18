@@ -61,3 +61,5 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
         });
     }
 ```
+可以看到插桩后```onCreate```方法中多了```TraceUtil.onActivityCreate(this);``` ; ```onClick```中多了```TraceUtil.onActivityClick(var1)```,即达到无痕埋点效果。
+         
