@@ -53,16 +53,22 @@ class MonitorClassVisitor extends ClassVisitor {
 
             @Override
             protected void onMethodEnter() {
-                if ((!className.startsWith('android')) && superName.contains("Activity") && "onCreate" == name) {
+                if (className.startsWith('android')) {
+                    return
+                }
+                if ("onCreate" == name
+                        && (superName == "AppCompatActivity" || superName == "Activity" || superName == "FragmentActivity")) {
                     mv.visitVarInsn(ALOAD, 0)
                     mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false)
-                } else if ((!className.startsWith('android')) && superName.contains("Activity") && "onDestroy" == name) {
+                } else if ("onDestroy" == name
+                        && (superName == "AppCompatActivity" || superName == "Activity" || superName == "FragmentActivity")) {
                     mv.visitVarInsn(ALOAD, 0)
                     mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
-                } else if ((!className.startsWith('android')) && superName.contains("Activity") && "onResume" == name) {
+                } else if ("onResume" == name
+                        && (superName == "AppCompatActivity" || superName == "Activity" || superName == "FragmentActivity")) {
                     mv.visitVarInsn(ALOAD, 0)
                     mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
-                } else if ((!className.startsWith('android')) && isMatchingInterfaces(interfaces, 'android/view/View$OnClickListener') && "onClick" == name) {
+                } else if (isMatchingInterfaces(interfaces, 'android/view/View$OnClickListener') && "onClick" == name) {
                     mv.visitVarInsn(ALOAD, 1)
                     mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityClick", "(Landroid/view/View;)V", false)
                 }

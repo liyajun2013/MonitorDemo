@@ -18,7 +18,7 @@ repositories {
 //以上都为固定写法
 //group和version
 group='com.lyj.monitor'
-version='1.0.0'
+version='1.0.4'
 
 //打包到本地或者远程Maven库
 uploadArchives {
