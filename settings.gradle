@@ -1,1 +1,1 @@
-include ':app', ':LibMonitor', ':plugin_monitor_gradle'
+include ':app', ':LibMonitor'
