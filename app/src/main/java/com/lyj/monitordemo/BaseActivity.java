@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 
 /**
  * author : lyj
- * e-mail : liyajun@wdai.com
  * time   : 2018/07/18
  * desc   :
  * version: 1.0
