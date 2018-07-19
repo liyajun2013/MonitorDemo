@@ -53,22 +53,32 @@ class MonitorClassVisitor extends ClassVisitor {
 
             @Override
             protected void onMethodEnter() {
+                /**
+                 * 排除系统类
+                 */
                 if (className.startsWith('android')) {
                     return
                 }
-                if ("onCreate" == name
-                        && (superName == "AppCompatActivity" || superName == "Activity" || superName == "FragmentActivity")) {
-                    mv.visitVarInsn(ALOAD, 0)
-                    mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false)
-                } else if ("onDestroy" == name
-                        && (superName == "AppCompatActivity" || superName == "Activity" || superName == "FragmentActivity")) {
-                    mv.visitVarInsn(ALOAD, 0)
-                    mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
-                } else if ("onResume" == name
-                        && (superName == "AppCompatActivity" || superName == "Activity" || superName == "FragmentActivity")) {
-                    mv.visitVarInsn(ALOAD, 0)
-                    mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
+
+                if (superName == "android/support/v7/app/AppCompatActivity"
+                        || superName == "android/support/v4.app/FragmentActivity"
+                        || superName == "android/support/v4.app/Activity") {
+                    //activity 生命周期埋点
+                    if ("onCreate" == name) {
+                        mv.visitVarInsn(ALOAD, 0)
+                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false)
+                    } else if ("onDestroy" == name) {
+                        mv.visitVarInsn(ALOAD, 0)
+                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
+                    } else if ("onResume" == name) {
+                        mv.visitVarInsn(ALOAD, 0)
+                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
+                    } else if ("onPause" == name) {
+                        mv.visitVarInsn(ALOAD, 0)
+                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityPause", "(Landroid/app/Activity;)V", false)
+                    }
                 } else if (isMatchingInterfaces(interfaces, 'android/view/View$OnClickListener') && "onClick" == name) {
+                    //onClick 埋点
                     mv.visitVarInsn(ALOAD, 1)
                     mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityClick", "(Landroid/view/View;)V", false)
                 }

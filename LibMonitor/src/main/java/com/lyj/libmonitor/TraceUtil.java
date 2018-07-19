@@ -37,7 +37,14 @@ public class TraceUtil {
     public static void onActivityResume(Activity activity) {
         Log.d(TAG, activity.getClass().getSimpleName() + "---onResume---");
     }
-
+    /**
+     * 当Activity执行了onPause时触发
+     *
+     * @param activity
+     */
+    public static void onActivityPause(Activity activity) {
+        Log.d(TAG, activity.getClass().getSimpleName() + "---onPause---");
+    }
     /**
      * 当Activity执行了onDestroy时触发
      *
