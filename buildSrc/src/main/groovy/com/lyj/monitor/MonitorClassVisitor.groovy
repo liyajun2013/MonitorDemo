@@ -6,6 +6,7 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.AdviceAdapter
 
 class MonitorClassVisitor extends ClassVisitor {
+    private ClassVisitor classVisitor;
     //类名
     private String className
     // 父类名
@@ -17,6 +18,7 @@ class MonitorClassVisitor extends ClassVisitor {
 
     public MonitorClassVisitor(ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor)
+        this.classVisitor = classVisitor
     }
 
     @Override
@@ -33,8 +35,8 @@ class MonitorClassVisitor extends ClassVisitor {
         MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions)
         methodVisitor = new AdviceAdapter(Opcodes.ASM5, methodVisitor, access, name, desc) {
             @Override
-            protected void onMethodEnter() {
-                super.onMethodEnter()
+            protected void onMethodExit(int i) {
+                super.onMethodExit(i)
                 // 排除系统类
                 if (className.startsWith('android')) {
                     return
@@ -44,25 +46,25 @@ class MonitorClassVisitor extends ClassVisitor {
                     //activity 生命周期埋点
                     if (MonitorConfig.ACTIVITY_METHOD_ONCREATE == name) {
                         visitedActivityMethods.add(MonitorConfig.ACTIVITY_METHOD_ONCREATE)
-                        mv.visitVarInsn(ALOAD, 0)
-                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false)
                     } else if (MonitorConfig.ACTIVITY_METHOD_ONDESTROY == name) {
                         visitedActivityMethods.add(MonitorConfig.ACTIVITY_METHOD_ONDESTROY)
-                        mv.visitVarInsn(ALOAD, 0)
-                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
                     } else if (MonitorConfig.ACTIVITY_METHOD_ONRESUME == name) {
                         visitedActivityMethods.add(MonitorConfig.ACTIVITY_METHOD_ONRESUME)
-                        mv.visitVarInsn(ALOAD, 0)
-                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
                     } else if (MonitorConfig.ACTIVITY_METHOD_ONPAUSE == name) {
                         visitedActivityMethods.add(MonitorConfig.ACTIVITY_METHOD_ONPAUSE)
-                        mv.visitVarInsn(ALOAD, 0)
-                        mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityPause", "(Landroid/app/Activity;)V", false)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityPause", "(Landroid/app/Activity;)V", false)
                     }
                 } else if (MonitorUtil.isMatchingInterfaces(interfaces, 'android/view/View$OnClickListener') && "onClick" == name) {
                     //onClick 埋点
-                    mv.visitVarInsn(ALOAD, 1)
-                    mv.visitMethodInsn(INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onClick", "(Landroid/view/View;)V", false)
+                    mv.visitVarInsn(Opcodes.ALOAD, 1)
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onClick", "(Landroid/view/View;)V", false)
                 }
             }
         }
@@ -71,11 +73,40 @@ class MonitorClassVisitor extends ClassVisitor {
 
     @Override
     void visitEnd() {
-        super.visitEnd()
         //是Activity类 查询其中4个方法是否都已调用，没调用的先插入函数再调用
-//        if (MonitorUtil.isExtendsActivity(superName)) {
-//            methodVisitor.getv
-//
-//        }
+        if (className.startsWith('android')) {
+            return
+        }
+
+        if (MonitorUtil.isExtendsActivity(superName)) {
+            boolean hasOnCreate = false
+            boolean hasOnDestory = false
+            boolean hasOnResume = false
+            boolean hasOnPause = false
+            for (int i = 0; i < visitedActivityMethods.size(); i++) {
+                if (visitedActivityMethods[i] == MonitorConfig.ACTIVITY_METHOD_ONCREATE) {
+                    hasOnCreate = true
+                } else if (visitedActivityMethods[i] == MonitorConfig.ACTIVITY_METHOD_ONDESTROY) {
+                    hasOnDestory = true
+                } else if (visitedActivityMethods[i] == MonitorConfig.ACTIVITY_METHOD_ONRESUME) {
+                    hasOnResume = true
+                } else if (visitedActivityMethods[i] == MonitorConfig.ACTIVITY_METHOD_ONPAUSE) {
+                    hasOnPause = true
+                }
+            }
+            if (!hasOnCreate) {
+                MonitorUtil.insertOnCreate(classVisitor, superName)
+            }
+            if (!hasOnDestory) {
+                MonitorUtil.insertOnDestroy(classVisitor, superName)
+            }
+            if (!hasOnResume) {
+                MonitorUtil.insertOnResume(classVisitor, superName)
+            }
+            if (!hasOnPause) {
+                MonitorUtil.insertOnPause(classVisitor, superName)
+            }
+        }
+        super.visitEnd()
     }
 }

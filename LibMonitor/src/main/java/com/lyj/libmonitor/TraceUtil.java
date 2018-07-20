@@ -12,7 +12,7 @@ public class TraceUtil {
      * 点击事件触发
      * @param view
      */
-    public static void onActivityClick(View view) {
+    public static void onClick(View view) {
         String activtyName = ViewPointUtil.getActivityName(view);
         String viewPath = ViewPointUtil.getPath(Monitor.context, view);
         Log.d(TAG, "activtyName--" + activtyName);
