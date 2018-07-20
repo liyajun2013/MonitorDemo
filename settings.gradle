@@ -1,1 +1,1 @@
-include ':app', ':LibMonitor'
+include ':app', ':LibMonitor', ':buildSrc'
