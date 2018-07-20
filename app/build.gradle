@@ -33,4 +33,4 @@ dependencies {
 }
 
 
-//apply plugin: 'com.lyj.monitor'
+apply plugin: com.lyj.monitor.MonitorPlugin

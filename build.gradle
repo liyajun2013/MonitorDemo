@@ -3,7 +3,8 @@
 buildscript {
     ext.kotlin_version = '1.1.61'
     repositories {
-        google()
+        mavenCentral()
+        maven { url "https://dl.google.com/dl/android/maven2/" }
         jcenter()
         maven {
             url uri('./PluginMonitor')
@@ -21,7 +22,8 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
+        mavenCentral()
+        maven { url "https://dl.google.com/dl/android/maven2/" }
         jcenter()
     }
 }
