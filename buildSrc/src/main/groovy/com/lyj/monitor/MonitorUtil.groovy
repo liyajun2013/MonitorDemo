@@ -1,7 +1,5 @@
 package com.lyj.monitor
 
-import com.sun.org.apache.bcel.internal.generic.ALOAD
-import com.sun.org.apache.bcel.internal.generic.INVOKESTATIC
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -37,13 +35,24 @@ class MonitorUtil {
         }
         return false
     }
-
+    /**
+     * 是否第一个继承Fragment的类
+     * @param superName
+     * @return
+     */
+    static boolean isExtendsFragment(String superName) {
+        if (superName == "android/app/Fragment"
+                || superName == "android/support/v4/app/Fragment") {
+            return true
+        }
+        return false
+    }
     /**
      * 插入onDestory函数 带有TraceUtil埋点
      * @param classVisitor
      * @param superName
      */
-    static void insertOnDestroy(ClassVisitor classVisitor, String superName) {
+    static void insertActivityOnDestroy(ClassVisitor classVisitor, String superName) {
         MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onDestroy", "()V", null, null)
         mv.visitCode()
         //插入super.onXxx
@@ -53,7 +62,7 @@ class MonitorUtil {
         mv.visitVarInsn(Opcodes.ALOAD, 0)
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
         mv.visitInsn(Opcodes.RETURN)
-        mv.visitMaxs(0, 1)
+        mv.visitMaxs(1, 1)
         mv.visitEnd()
     }
 
@@ -62,7 +71,7 @@ class MonitorUtil {
      * @param classVisitor
      * @param superName
      */
-    static void insertOnCreate(ClassVisitor classVisitor, String superName) {
+    static void insertActivityOnCreate(ClassVisitor classVisitor, String superName) {
         MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onCreate", "(Landroid/os/Bundle;)V", null, null)
         mv.visitCode()
         //插入super.onXxx
@@ -71,7 +80,8 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onCreate", "(Landroid/os/Bundle;)V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false);        mv.visitInsn(Opcodes.RETURN)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false);
+        mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(2, 2)
         mv.visitEnd()
     }
@@ -81,7 +91,7 @@ class MonitorUtil {
      * @param classVisitor
      * @param superName
      */
-    static void insertOnResume(ClassVisitor classVisitor, String superName) {
+    static void insertActivityOnResume(ClassVisitor classVisitor, String superName) {
         MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onResume", "()V", null, null)
         mv.visitCode()
         //插入super.onXxx
@@ -91,7 +101,7 @@ class MonitorUtil {
         mv.visitVarInsn(Opcodes.ALOAD, 0)
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
         mv.visitInsn(Opcodes.RETURN)
-        mv.visitMaxs(0, 1)
+        mv.visitMaxs(1, 1)
         mv.visitEnd()
     }
     /**
@@ -99,7 +109,7 @@ class MonitorUtil {
      * @param classVisitor
      * @param superName
      */
-    static void insertOnPause(ClassVisitor classVisitor, String superName) {
+    static void insertActivityOnPause(ClassVisitor classVisitor, String superName) {
         MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onPause", "()V", null, null)
         mv.visitCode()
         //插入super.onXxx
@@ -109,9 +119,87 @@ class MonitorUtil {
         mv.visitVarInsn(Opcodes.ALOAD, 0)
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityPause", "(Landroid/app/Activity;)V", false)
         mv.visitInsn(Opcodes.RETURN)
-        mv.visitMaxs(0, 1)
+        mv.visitMaxs(1, 1)
         mv.visitEnd()
     }
 
+    /**
+     * 插入onResume函数 带有TraceUtil埋点
+     * @param classVisitor
+     * @param superName
+     */
+    static void insertFragmentOnResume(ClassVisitor classVisitor, String superName) {
+        MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PUBLIC, "onResume", "()V", null, null);
+        mv.visitCode()
+        //插入super.onXxx
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onResume", "()V", false)
+        //插入需要的函数
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentResume", "(Ljava/lang/Object;)V", false)
+        mv.visitInsn(Opcodes.RETURN)
+        mv.visitMaxs(1, 1)
+        mv.visitEnd()
+    }
 
+    /**
+     * 插入onPause函数 带有TraceUtil埋点
+     * @param classVisitor
+     * @param superName
+     */
+    static void insertFragmentOnPause(ClassVisitor classVisitor, String superName) {
+        MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PUBLIC, "onPause", "()V", null, null);
+        mv.visitCode()
+        //插入super.onXxx
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onPause", "()V", false)
+        //插入需要的函数
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentPause", "(Ljava/lang/Object;)V", false)
+        mv.visitInsn(Opcodes.RETURN)
+        mv.visitMaxs(1, 1)
+        mv.visitEnd()
+    }
+
+    /**
+     * 插入onHiddenChanged函数 带有TraceUtil埋点
+     * @param classVisitor
+     * @param superName
+     */
+    static void insertFragmentOnHiddenChanged(ClassVisitor classVisitor, String superName) {
+        MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PUBLIC, "onHiddenChanged", "(Z)V", null, null)
+        mv.visitCode()
+        //插入super.onXxx
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitVarInsn(Opcodes.ILOAD, 1)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onHiddenChanged", "(Z)V", false)
+        //插入需要的函数
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitVarInsn(Opcodes.ILOAD, 1)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V", false)
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(2, 2);
+        mv.visitEnd()
+    }
+
+    /**
+     * 插入setUserVisibleHint函数 带有TraceUtil埋点
+     * @param classVisitor
+     * @param superName
+     */
+    static void insertFragmentSetUserVisibleHint(ClassVisitor classVisitor, String superName) {
+        MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PUBLIC, "setUserVisibleHint", "(Z)V", null, null)
+        mv.visitCode()
+        //插入super.onXxx
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitVarInsn(Opcodes.ILOAD, 1)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "setUserVisibleHint", "(Z)V", false)
+        //插入需要的函数
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitVarInsn(Opcodes.ILOAD, 1)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentSetUserVisibleHint", "(Ljava/lang/Object;Z)V", false)
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(2, 2);
+        mv.visitEnd()
+    }
 }

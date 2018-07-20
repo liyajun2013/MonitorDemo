@@ -14,7 +14,9 @@ class MonitorClassVisitor extends ClassVisitor {
     //该类实现的接口
     private String[] interfaces
     //Activity访问过的方法，在类结束时判断是否需要添加方法
-    public HashSet<String> visitedActivityMethods = new HashSet<>()// 无需判空
+    public HashSet<String> visitedActivityMethods = new HashSet<>()
+    //Fragment访问过的方法，在类结束时判断是否需要添加方法
+    public HashSet<String> visitedFragmentMethods = new HashSet<>()
 
     public MonitorClassVisitor(ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor)
@@ -61,6 +63,27 @@ class MonitorClassVisitor extends ClassVisitor {
                         mv.visitVarInsn(Opcodes.ALOAD, 0)
                         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityPause", "(Landroid/app/Activity;)V", false)
                     }
+                } else if (MonitorUtil.isExtendsFragment(superName)) {
+                    //fragment 生命周期埋点
+                    if (MonitorConfig.FRAGMENT_METHOD_ONRESUME == name) {
+                        visitedFragmentMethods.add(MonitorConfig.FRAGMENT_METHOD_ONRESUME)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentResume", "(Ljava/lang/Object;)V", false)
+                    } else if (MonitorConfig.FRAGMENT_METHOD_ONPAUSE == name) {
+                        visitedFragmentMethods.add(MonitorConfig.FRAGMENT_METHOD_ONPAUSE)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentPause", "(Ljava/lang/Object;)V", false)
+                    } else if (MonitorConfig.FRAGMENT_METHOD_ONHIDDENCHANGED == name) {
+                        visitedFragmentMethods.add(MonitorConfig.FRAGMENT_METHOD_ONHIDDENCHANGED)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitVarInsn(Opcodes.ILOAD, 1)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V", false)
+                    } else if (MonitorConfig.FRAGMENT_METHOD_SETUSERVISIBLEHINT == name) {
+                        visitedFragmentMethods.add(MonitorConfig.FRAGMENT_METHOD_SETUSERVISIBLEHINT)
+                        mv.visitVarInsn(Opcodes.ALOAD, 0)
+                        mv.visitVarInsn(Opcodes.ILOAD, 1)
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentSetUserVisibleHint", "(Ljava/lang/Object;Z)V", false)
+                    }
                 } else if (MonitorUtil.isMatchingInterfaces(interfaces, 'android/view/View$OnClickListener') && "onClick" == name) {
                     //onClick 埋点
                     mv.visitVarInsn(Opcodes.ALOAD, 1)
@@ -73,12 +96,12 @@ class MonitorClassVisitor extends ClassVisitor {
 
     @Override
     void visitEnd() {
-        //是Activity类 查询其中4个方法是否都已调用，没调用的先插入函数再调用
         if (className.startsWith('android')) {
             return
         }
 
         if (MonitorUtil.isExtendsActivity(superName)) {
+            //是Activity类 查询其中4个方法是否都已调用，没调用的先插入函数再调用
             boolean hasOnCreate = false
             boolean hasOnDestory = false
             boolean hasOnResume = false
@@ -95,16 +118,45 @@ class MonitorClassVisitor extends ClassVisitor {
                 }
             }
             if (!hasOnCreate) {
-                MonitorUtil.insertOnCreate(classVisitor, superName)
+                MonitorUtil.insertActivityOnCreate(classVisitor, superName)
             }
             if (!hasOnDestory) {
-                MonitorUtil.insertOnDestroy(classVisitor, superName)
+                MonitorUtil.insertActivityOnDestroy(classVisitor, superName)
             }
             if (!hasOnResume) {
-                MonitorUtil.insertOnResume(classVisitor, superName)
+                MonitorUtil.insertActivityOnResume(classVisitor, superName)
             }
             if (!hasOnPause) {
-                MonitorUtil.insertOnPause(classVisitor, superName)
+                MonitorUtil.insertActivityOnPause(classVisitor, superName)
+            }
+        } else if (MonitorUtil.isExtendsFragment(superName)) {
+            //是Fragment类 查询其中4个方法是否都已调用，没调用的先插入函数再调用
+            boolean hasOnResume = false
+            boolean hasOnPause = false
+            boolean hasOnHiddenChanged = false
+            boolean hasSetUserVisibleHint = false
+            for (int i = 0; i < visitedFragmentMethods.size(); i++) {
+                if (visitedFragmentMethods[i] == MonitorConfig.FRAGMENT_METHOD_ONRESUME) {
+                    hasOnResume = true
+                } else if (visitedFragmentMethods[i] == MonitorConfig.FRAGMENT_METHOD_ONPAUSE) {
+                    hasOnPause = true
+                } else if (visitedFragmentMethods[i] == MonitorConfig.FRAGMENT_METHOD_ONHIDDENCHANGED) {
+                    hasOnHiddenChanged = true
+                } else if (visitedFragmentMethods[i] == MonitorConfig.FRAGMENT_METHOD_SETUSERVISIBLEHINT) {
+                    hasSetUserVisibleHint = true
+                }
+            }
+            if (!hasOnResume) {
+                MonitorUtil.insertFragmentOnResume(classVisitor, superName)
+            }
+            if (!hasOnPause) {
+                MonitorUtil.insertFragmentOnPause(classVisitor, superName)
+            }
+            if (!hasOnHiddenChanged) {
+                MonitorUtil.insertFragmentOnHiddenChanged(classVisitor, superName)
+            }
+            if (!hasSetUserVisibleHint) {
+                MonitorUtil.insertFragmentSetUserVisibleHint(classVisitor, superName)
             }
         }
         super.visitEnd()
