@@ -7,11 +7,15 @@ import android.content.ContextWrapper;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.ContentFrameLayout;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author : lyj
@@ -20,8 +24,43 @@ import java.util.List;
  * version: 1.0
  */
 public class ViewPointUtil {
-
     public static String getPath(Context context, View childView) {
+        StringBuffer buffer = new StringBuffer();
+        String viewType = childView.getClass().getSimpleName();
+        ViewGroup parentView = (ViewGroup) childView.getParent();
+        while (!(childView instanceof ContentFrameLayout)) {
+            int index = 0;
+            if (parentView instanceof RecyclerView) {
+                index = ((RecyclerView) parentView).getChildAdapterPosition(childView);
+            } else if (parentView instanceof AdapterView) {
+                index = ((AdapterView) parentView).getPositionForView(childView);
+            } else if (parentView instanceof ViewPager) {
+                index = ((ViewPager) parentView).getCurrentItem();
+            } else {
+                int childIndex = parentView.indexOfChild(childView);
+                for (int i = 0; i < childIndex; i++) {
+                    if (parentView.getChildAt(i).getClass().getSimpleName().equals(viewType)) {
+                        index++;
+                    }
+                }
+            }
+            String fragmentValue = buildFragmentSegment(TraceUtil.sAliveFragMap, childView, "[" + index + "]");
+            if (TextUtils.isEmpty(fragmentValue)) {
+                StringBuilder element = new StringBuilder();
+                element.append("/").append(viewType).append("[").append(index).append("]")
+                        .append(getResourceId(context, childView.getId()));
+                buffer.insert(0, element.toString());
+            } else {
+                buffer.insert(0, fragmentValue);
+            }
+            childView = parentView;
+            viewType = childView.getClass().getSimpleName();
+            parentView = (ViewGroup) childView.getParent();
+        }
+        return buffer.toString();
+    }
+
+    public static String getPath1(Context context, View childView) {
         StringBuffer buffer = new StringBuffer();
         String viewType = childView.getClass().getSimpleName();
         View parentView = childView;
@@ -43,20 +82,43 @@ public class ViewPointUtil {
             } else if (childView.getParent() instanceof ViewPager) {
                 index = ((ViewPager) childView.getParent()).getCurrentItem();
             }
+            String fragmentValue = buildFragmentSegment(TraceUtil.sAliveFragMap, viewparnet, "[" + index + "]");
+            if (!TextUtils.isEmpty(fragmentValue)) {
+                buffer.insert(0, fragmentValue);
+            }
             buffer.insert(0, getResourceId(context, childView.getId()));
-            buffer.insert(0, "]");
-            buffer.insert(0, index);
-            buffer.insert(0, "[");
+            buffer.insert(0, "[" + index + "]");
             buffer.insert(0, viewType);
             parentView = (ViewGroup) parentView.getParent();
             viewType = parentView.getClass().getSimpleName();
             childView = parentView;
             buffer.insert(0, "/");
-        } while (parentView.getParent() instanceof ContentFrameLayout);
+        }
+        while (parentView.getParent() != null && !(parentView.getParent() instanceof ContentFrameLayout));
 
         buffer.insert(0, getResourceId(context, childView.getId()));
         buffer.insert(0, viewType);
         return buffer.toString();
+    }
+
+    private static String buildFragmentSegment(HashMap<Integer, String> aliveFragments, View child, String validIndexSegment) {
+        // deal with Fragment
+        StringBuilder element = new StringBuilder();
+        if (aliveFragments != null) {
+            Iterator<Map.Entry<Integer, String>> iterator = aliveFragments.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, String> entry = iterator.next();
+                int viewCode = entry.getKey();
+                String fragName = entry.getValue();
+                if (viewCode == child.hashCode()) {
+                    element.append("/")
+                            .append(fragName)
+                            .append(validIndexSegment);
+                    break;
+                }
+            }
+        }
+        return element.toString();
     }
 
 

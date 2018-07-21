@@ -1,8 +1,8 @@
 package com.lyj.monitordemo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,14 +20,16 @@ public class SecondActivity extends BaseActivity {
         setContentView(R.layout.activity_second);
 
         TextView textView = (TextView) findViewById(R.id.text);
-        Button button1 = (Button) findViewById(R.id.button1);
         Button button2 = (Button) findViewById(R.id.button2);
-        Button button3 = (Button) findViewById(R.id.button3);
+
+        AFragment aFragment = new AFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_content, aFragment, AFragment.class.getSimpleName());
+        transaction.commitAllowingStateLoss();
 
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(SecondActivity.this, MainActivity.class));
             }
         });
 
