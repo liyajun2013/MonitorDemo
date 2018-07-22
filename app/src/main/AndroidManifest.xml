@@ -17,6 +17,14 @@
             </intent-filter>
         </activity>
        <activity android:name=".SecondActivity"/>
+
+        <activity
+            android:name=".SampleFeedsActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="portrait"
+            >
+
+        </activity>
     </application>
 
 </manifest>

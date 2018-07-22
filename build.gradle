@@ -9,6 +9,9 @@ buildscript {
         maven {
             url uri('./PluginMonitor')
         }
+        maven {
+            url "https://raw.githubusercontent.com/nailperry-zd/Codeless-Gradle-Plugin-Repo/master"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
@@ -30,4 +33,10 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+ext{
+    supportLibraryVersion = '23.4.0'
+    systembartintVersion = "1.0.+"
+    newsfeedsDataVersion = "1.5.0"
+    newsfeedsUIVersion = "1.5.0"
 }

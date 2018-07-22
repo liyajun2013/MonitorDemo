@@ -30,6 +30,31 @@ dependencies {
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
     implementation project(':LibMonitor')
+
+    compile ('com.jakewharton:butterknife:8.5.1') {
+        exclude group: 'com.android.support', module: 'support-compat'
+    }
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    // data-sdk依赖库
+    compile 'com.alibaba:fastjson:1.2.8'
+    // ui-sdk依赖库
+    compile "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
+    compile "com.readystatesoftware.systembartint:systembartint:$rootProject.systembartintVersion"
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+
+    compile ("com.netease.youliao:newsfeeds-data:$rootProject.newsfeedsDataVersion"){
+        exclude group: 'com.android.support'
+    }
+    compile ("com.netease.youliao:newsfeeds-ui:$rootProject.newsfeedsUIVersion"){
+        exclude group: 'com.android.support'
+    }
+
+    // 定位 sdk
+    compile 'com.amap.api:location:latest.integration'
+
+    // 微信分享
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:1.0.2'
 }
 
 
