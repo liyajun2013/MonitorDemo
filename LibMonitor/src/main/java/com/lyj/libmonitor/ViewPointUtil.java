@@ -28,7 +28,7 @@ public class ViewPointUtil {
         StringBuffer buffer = new StringBuffer();
         String viewType = childView.getClass().getSimpleName();
         ViewGroup parentView = (ViewGroup) childView.getParent();
-        while (!(childView instanceof ContentFrameLayout)) {
+        while (parentView != null && !(childView instanceof ContentFrameLayout)) {
             int index = 0;
             if (parentView instanceof RecyclerView) {
                 index = ((RecyclerView) parentView).getChildAdapterPosition(childView);
