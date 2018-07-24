@@ -42,7 +42,9 @@ class MonitorUtil {
      */
     static boolean isExtendsFragment(String superName) {
         if (superName == "android/app/Fragment"
-                || superName == "android/support/v4/app/Fragment") {
+                || superName == "android/support/v4/app/Fragment"
+                || superName == "android/support/v4/app/DialogFragment"
+                || superName == "android/app/DialogFragment") {
             return true
         }
         return false
