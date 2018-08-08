@@ -6,8 +6,8 @@ Android无埋点数据收集框架。
 ## LibMonitor
 具体实现埋点工具类。当前版本![LibMonitor Version](https://img.shields.io/badge/release-1.0.0-brightgreen.svg)
 
-## plugin_monitor_gradle
-gradle插件，实现字节码插桩。当前版本![plugin_monitor_gradle Version](https://img.shields.io/badge/release-1.0.0-brightgreen.svg)
+## buildSrc
+gradle插件，实现字节码插桩。当前版本![buildSrc Version](https://img.shields.io/badge/release-1.0.0-brightgreen.svg)
 
 
 插桩前代码
