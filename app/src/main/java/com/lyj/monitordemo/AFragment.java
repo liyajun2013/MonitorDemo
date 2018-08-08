@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 /**
  * author : lyj
- * e-mail : liyajun@wdai.com
  * time   : 2018/07/19
  * desc   :
  * version: 1.0
