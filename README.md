@@ -1,7 +1,7 @@
 # Monitor
 Android无埋点数据收集框架。
 
-参考[博文](https://juejin.im/post/58ec8558a22b9d006340531d)技术点，使用ASM插桩实现具体埋点功能。使用主要由下面的架包完成。
+参考[博文](https://juejin.im/post/58ec8558a22b9d006340531d)技术点，使用ASM字节码插桩实现具体埋点功能。使用主要由下面的架包完成。
 
 ## LibMonitor
 具体实现埋点工具类。当前版本![LibMonitor Version](https://img.shields.io/badge/release-1.0.0-brightgreen.svg)
