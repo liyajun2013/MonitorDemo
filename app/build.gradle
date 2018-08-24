@@ -5,12 +5,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '26.0.2'
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
     defaultConfig {
         applicationId "com.lyj.monitordemo"
-        minSdkVersion 16
-        targetSdkVersion 23
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -25,37 +25,13 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
-    implementation project(':LibMonitor')
-
-    compile ('com.jakewharton:butterknife:8.5.1') {
-        exclude group: 'com.android.support', module: 'support-compat'
-    }
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
-
-    // data-sdk依赖库
-    compile 'com.alibaba:fastjson:1.2.8'
-    // ui-sdk依赖库
-    compile "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
-    compile "com.readystatesoftware.systembartint:systembartint:$rootProject.systembartintVersion"
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-
-    compile ("com.netease.youliao:newsfeeds-data:$rootProject.newsfeedsDataVersion"){
-        exclude group: 'com.android.support'
-    }
-    compile ("com.netease.youliao:newsfeeds-ui:$rootProject.newsfeedsUIVersion"){
-        exclude group: 'com.android.support'
-    }
-
-    // 定位 sdk
-    compile 'com.amap.api:location:latest.integration'
-
-    // 微信分享
-    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:1.0.2'
+    api rootProject.ext.dependencies["kotlin_version"]
+    api rootProject.ext.dependencies["recyclerview-v7"]
+    api rootProject.ext.dependencies["appcompat-v7"]
+    api project(':tracker')
+    api project(':mylibrary')
 }
+
 
 
 apply plugin: com.lyj.monitor.MonitorPlugin

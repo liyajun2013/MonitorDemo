@@ -62,7 +62,7 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onDestroy", "()V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/ActivityLifeUtil", "onActivityDestroy", "(Landroid/app/Activity;)V", false);
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(1, 1)
         mv.visitEnd()
@@ -82,7 +82,7 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onCreate", "(Landroid/os/Bundle;)V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/ActivityLifeUtil", "onActivityCreate", "(Landroid/app/Activity;)V", false);
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(2, 2)
         mv.visitEnd()
@@ -101,16 +101,53 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onResume", "()V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityResume", "(Landroid/app/Activity;)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/ActivityLifeUtil", "onActivityResume", "(Landroid/app/Activity;)V", false);
+        mv.visitInsn(Opcodes.RETURN)
+        mv.visitMaxs(1, 1)
+        mv.visitEnd()
+    }
+
+    /**
+     * 插入onStart函数 带有TraceUtil埋点
+     * @param classVisitor
+     * @param superName
+     */
+    static void insertActivityOnStart(ClassVisitor classVisitor, String superName) {
+        MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onStart", "()V", null, null)
+        mv.visitCode()
+        //插入super.onXxx
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onStart", "()V", false)
+        //插入需要的函数
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/ActivityLifeUtil", "onActivityStart", "(Landroid/app/Activity;)V", false);
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(1, 1)
         mv.visitEnd()
     }
     /**
-     * 插入onPause函数 带有TraceUtil埋点
+     * 插入onStop函数 带有TraceUtil埋点
      * @param classVisitor
      * @param superName
      */
+    static void insertActivityOnStop(ClassVisitor classVisitor, String superName) {
+        MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onStop", "()V", null, null)
+        mv.visitCode()
+        //插入super.onXxx
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onStop", "()V", false)
+        //插入需要的函数
+        mv.visitVarInsn(Opcodes.ALOAD, 0)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/ActivityLifeUtil", "onActivityStop", "(Landroid/app/Activity;)V", false);
+        mv.visitInsn(Opcodes.RETURN)
+        mv.visitMaxs(1, 1)
+        mv.visitEnd()
+    }
+/**
+ * 插入onPause函数 带有TraceUtil埋点
+ * @param classVisitor
+ * @param superName
+ */
     static void insertActivityOnPause(ClassVisitor classVisitor, String superName) {
         MethodVisitor mv = classVisitor.visitMethod(Opcodes.ACC_PROTECTED, "onPause", "()V", null, null)
         mv.visitCode()
@@ -119,12 +156,11 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onPause", "()V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onActivityPause", "(Landroid/app/Activity;)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/ActivityLifeUtil", "onActivityPause", "(Landroid/app/Activity;)V", false);
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(1, 1)
         mv.visitEnd()
     }
-
     /**
      * 插入onResume函数 带有TraceUtil埋点
      * @param classVisitor
@@ -138,7 +174,7 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onResume", "()V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentResume", "(Ljava/lang/Object;)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/FragmentLifeUtil", "onFragmentResume", "(Landroid/support/v4/app/Fragment;)V", false);
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(1, 1)
         mv.visitEnd()
@@ -157,7 +193,7 @@ class MonitorUtil {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "onPause", "()V", false)
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentPause", "(Ljava/lang/Object;)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/FragmentLifeUtil", "onFragmentPause", "(Landroid/support/v4/app/Fragment;)V", false);
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(1, 1)
         mv.visitEnd()
@@ -178,7 +214,7 @@ class MonitorUtil {
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
         mv.visitVarInsn(Opcodes.ILOAD, 1)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/FragmentLifeUtil", "onFragmentHiddenChanged", "(Landroid/support/v4/app/Fragment;Z)V", false);
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(2, 2);
         mv.visitEnd()
@@ -199,7 +235,7 @@ class MonitorUtil {
         //插入需要的函数
         mv.visitVarInsn(Opcodes.ALOAD, 0)
         mv.visitVarInsn(Opcodes.ILOAD, 1)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/lyj/libmonitor/TraceUtil", "onFragmentSetUserVisibleHint", "(Ljava/lang/Object;Z)V", false)
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/foolchen/lib/tracker/utils/FragmentLifeUtil", "onFragmentSetUserVisibleHint", "(Landroid/support/v4/app/Fragment;Z)V", false);
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(2, 2);
         mv.visitEnd()

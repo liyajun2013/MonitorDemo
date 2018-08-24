@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.foolchen.lib.tracker.Tracker;
+
 /**
  * author : lyj
  * time   : 2018/07/18
@@ -19,7 +21,7 @@ public class SecondActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        TextView textView = (TextView) findViewById(R.id.text);
+        TextView textView = (TextView) findViewById(R.id.text_test);
         Button button2 = (Button) findViewById(R.id.button2);
 
         AFragment aFragment = new AFragment();
@@ -30,9 +32,9 @@ public class SecondActivity extends BaseActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Tracker.INSTANCE.trackView(view);
             }
         });
-
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override

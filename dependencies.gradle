@@ -1,0 +1,152 @@
+project.ext {
+    def supportVersion = "25.1.0"
+    def glide = "3.7.0";
+    def glide4 = "4.1.1";
+    def eventbus = "3.0.0";
+    def rxpermissions = "0.7.0@aar";
+    def rxandroid = "1.2.0";
+    def bugly = "2.6.5";
+    def umeng = "7.5.0";
+    def amap = "latest.integration";
+    def circlebutton = "1.1";
+    def badgeview = "1.1.3";
+    def rxbinding = "1.0.1";
+    def rxlifecycle = "1.0";
+    def CircularProgress = "1.0.2";
+    def kotlin_version = "1.2.0";
+    def multidex = "1.0.1";
+    def materialrefeshlayout = "1.3.0";
+    def bga_qrcode_zxing = "1.2.0";
+    def rxbus = "1.0.6";
+    def seek = "3.12"
+    def sublimepicker = "2.1.1"
+    def flexbox = "0.2.6"
+    def getui = "2.9.5.0"
+    def loading = "2.1.3"
+    def secure_preferences = "0.1.4"
+    def routerAnnoCompiler = "1.0.0"
+    def rubberstamp = "1.0.0"
+    def arouter = "1.3.1"
+    def okhttp = "3.9.1"
+    def retrofit = "2.3.0"
+    def gson = "2.8.1"
+    def rxjava = "2.1.13"
+
+    android = [
+            compileSdkVersion: 25,
+            buildToolsVersion: "26.0.2",
+            minSdkVersion    : 16,
+            targetSdkVersion : 23,
+    ]
+
+    dependencies = [
+            //android-support
+            "support-v4"          : "com.android.support:support-v4:${supportVersion}",
+            "appcompat-v7"        : "com.android.support:appcompat-v7:${supportVersion}",
+            "design"              : "com.android.support:design:${supportVersion}",
+            "annotations"         : "com.android.support:support-annotations:${supportVersion}",
+            "recyclerview-v7"     : "com.android.support:recyclerview-v7:${supportVersion}",
+            "cardview-v7"         : "com.android.support:cardview-v7:${supportVersion}",
+            "constraint-layout"   : "com.android.support.constraint:constraint-layout:1.0.2",
+
+            //rx
+            "rxandroid"           : "io.reactivex:rxandroid:${rxandroid}",
+
+            //glide 3.0
+            "glide"               : "com.github.bumptech.glide:glide:${glide}",
+            //glide 4.0
+            "glide4"              : "com.github.bumptech.glide:glide:${glide4}",
+
+            //eventbus
+            "eventbus"            : "org.greenrobot:eventbus:${eventbus}",
+
+            //rxpermissions
+            "rxpermissions"       : "com.tbruyelle.rxpermissions:rxpermissions:${rxpermissions}",
+
+            //bugly
+            "bugly"               : "com.tencent.bugly:crashreport:${bugly}",
+
+            //umeng
+            "umeng"               : "com.umeng.sdk:analytics:${umeng}",
+
+            //amap
+            "amap"                : "com.amap.api:location:${amap}",
+
+            //circlebutton
+            "circlebutton"        : "com.github.markushi:circlebutton:${circlebutton}",
+
+            //badgeview
+            "badgeview"           : "q.rorbin:badgeview:${badgeview}",
+
+            //rxbinding
+            "rxbinding"           : "com.jakewharton.rxbinding:rxbinding:${rxbinding}",
+
+            //rxlifecycle
+            "rxlifecycle"         : "com.trello:rxlifecycle-components:${rxlifecycle}",
+
+            //CircularProgress
+            "CircularProgress"    : "org.quanqi:CircularProgress:${CircularProgress}",
+
+            "kotlin_version"      : "org.jetbrains.kotlin:kotlin-stdlib-jre7:${kotlin_version}",
+
+            "multidex"            : "com.android.support:multidex:${multidex}",
+
+            "materialrefeshlayout": "com.cjj.materialrefeshlayout:library:${materialrefeshlayout}",
+
+            //二维码
+            "bga_qrcode_zxing"    : "cn.bingoogolapple:bga-qrcode-zxing:${bga_qrcode_zxing}",
+
+            //test
+            "junit"               : "junit:junit:4.12",
+            //rxbus
+            "rxbus"               : "com.hwangjr.rxbus:rxbus:${rxbus}",
+
+            "seek"                : "com.xw.repo:bubbleseekbar:${seek}",
+
+            "sublimepicker"       : "com.appeaser.sublimepickerlibrary:sublimepickerlibrary:${sublimepicker}",
+
+            "secure_preferences"  : "com.scottyab:secure-preferences-lib:${secure_preferences}",
+
+            "flexbox"             : "com.google.android:flexbox:${flexbox}",
+
+            "loading"             : "com.wang.avi:library:${loading}",
+
+            "getui"               : "com.getui:sdk:${getui}",
+
+            "rubberstamp"         : "com.vinaygaba:rubberstamp:${rubberstamp}",
+            //路由代码生成
+            "routerAnnoCompiler"  : "com.luojilab.ddcomponent:router-anno-compiler:${routerAnnoCompiler}",
+            "arouter"             : "com.alibaba:arouter:${arouter}",
+            "gson"                : "com.google.code.gson:gson:${gson}",
+            "okhttp"              : "com.squareup.okhttp3:okhttp:${okhttp}",
+            "rxjava"              : "io.reactivex.rxjava2:rxjava:${rxjava}",
+            "retrofit"            : "com.squareup.retrofit2:retrofit:${retrofit}"
+
+    ]
+}
+
+subprojects {
+    project.configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'com.squareup.okhttp3'
+                    && details.requested.name.contains('okhttp')) {
+                details.useVersion "3.3.1"
+            }
+            if (details.requested.group == 'com.squareup.retrofit2'
+                    && details.requested.name.contains('retrofit')) {
+                details.useVersion "2.2.0"
+            }
+            if (details.requested.group == 'com.android.support'
+                    && details.requested.name.contains('support')) {
+                details.useVersion "25.1.0"
+            }
+
+            if (details.requested.group == 'com.android.support'
+                    && details.requested.name.contains('recyclerview')) {
+                details.useVersion "25.1.0"
+            }
+
+        }
+    }
+}
+

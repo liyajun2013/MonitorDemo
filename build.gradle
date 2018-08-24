@@ -1,31 +1,18 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
+apply from: "dependencies.gradle"
 buildscript {
-    ext.kotlin_version = '1.1.61'
     repositories {
-        mavenCentral()
         maven { url "https://dl.google.com/dl/android/maven2/" }
         jcenter()
-        maven {
-            url uri('./PluginMonitor')
-        }
-        maven {
-            url "https://raw.githubusercontent.com/nailperry-zd/Codeless-Gradle-Plugin-Repo/master"
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//        classpath "com.lyj.monitor:plugin_monitor_gradle:1.0.8"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.61"
     }
 }
 
 allprojects {
     repositories {
-        mavenCentral()
         maven { url "https://dl.google.com/dl/android/maven2/" }
         jcenter()
     }
@@ -33,10 +20,4 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-ext{
-    supportLibraryVersion = '23.4.0'
-    systembartintVersion = "1.0.+"
-    newsfeedsDataVersion = "1.5.0"
-    newsfeedsUIVersion = "1.5.0"
 }
