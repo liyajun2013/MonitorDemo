@@ -1,0 +1,133 @@
+buildApk(){
+    cd $(dirname $0); pwd -P
+    echo "Clean old build"
+    find . -d -name "build" | xargs rm -rf
+    flutter clean
+    echo "Get packages"
+    flutter packages upgrade
+    flutter build apk
+}
+
+
+pomStr="task testPom {
+    apply plugin: 'maven'
+    description 'create Pom for libY SDK'
+    pom {
+        project {
+            groupId 'com.test.flutterplugin'
+            artifactId 'mvn_artifactId'
+            version 'mvn_version'
+            packaging 'aar'
+        }
+    }.withXml {
+        //处理多渠道
+        def compiles = [configurations.compile,configurations.api]
+        def dependenciesNode = asNode().appendNode('dependencies')
+        compiles.each {
+            it.allDependencies.each { dependency ->
+                if (dependency.name != 'unspecified') {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', dependency.group)
+                    dependencyNode.appendNode('artifactId', dependency.name)
+                    dependencyNode.appendNode('version', dependency.version)
+                    dependencyNode.appendNode('scope', 'compile')
+                }
+            }
+        }
+    }.writeTo('testPomTemp/pom.xml')
+}"
+
+projectModlue="
+apply plugin: 'maven'
+uploadArchives {
+    configuration = configurations.archives
+    repositories {
+        mavenDeployer {
+            repository(url: '') {
+                authentication(userName: '', password: '')
+            }
+            snapshotRepository(url: '') {
+                authentication(userName: '', password: '')
+            }
+
+            pom.project {
+                name 'example_name'
+                version 'example_version'
+                artifactId 'example_artifactId'
+                groupId 'com.test.flutterlib'
+                packaging 'aar'
+                description ''
+            }
+        }
+    }
+}"
+
+
+function yamlparse {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+
+uploadAar(){
+    echo "Start publish flutter-plugins"
+    for line in $(cat .flutter-plugins)
+    do
+        plugin_name=${line%%=*}
+        echo 'Build and publish plugin_name:' ${plugin_name}
+        plugin_path=${line//*=}
+        echo 'Build and publish plugin_path:' ${plugin_path}
+        cd "${plugin_path}/android"
+        eval $(yamlparse "${plugin_path}pubspec.yaml" "yaml_")
+        if [ `grep -c "apply from: 'testPom.gradle'" ${plugin_path}/android/build.gradle` -eq '0' ]; then
+            echo -e "\napply from: 'testPom.gradle'" >> "${plugin_path}/android/build.gradle"
+        else
+            echo "has apply from: 'testPom.gradle'"
+        fi
+        rm -f "${plugin_path}/android/testPom.gradle"
+        pomStr=${pomStr/mvn_version/${yaml_version}}
+        pomStr=${pomStr/mvn_artifactId/"test"${yaml_name}}
+        echo -e "${pomStr}" > "${plugin_path}/android/testPom.gradle"
+        echo "--------------gradle testPom-----------"
+        gradle testPom
+        echo "--------------mvn deploy-----------"
+     #  此处暂时还有问题 上传不上去 gradle testPom要两次才可以生产testPomTemp/pom.xml文件
+     #  mvn deploy:deploy-file -DpomFile=${plugin_path}/testPomTemp/pom.xml -Dfile=${plugin_path}/build/outputs/aar/${yaml_name}-release.aar -Durl= -DrepositoryId=wyk
+    done
+}
+
+uploadProject(){
+    eval $(yamlparse "${plugin_path}pubspec.yaml" "yaml_")
+    projectModlue=${projectModlue/example_name/${yaml_name}"test"}
+    projectModlue=${projectModlue/example_artifactId/${yaml_name}"test"}
+    if [ "$1" == "release" ];then
+        projectModlue=${projectModlue/example_version/${yaml_version}}
+    else 
+        projectModlue=${projectModlue/example_version/${yaml_version}"-SNAPSHOT"}
+    fi
+    cd ".android"
+    if [ `grep -c "apply from: 'testUpload.gradle'" Flutter/build.gradle` -eq '0' ]; then
+        echo -e "\napply from: 'testUpload.gradle'" >> Flutter/build.gradle
+    else
+        echo "has apply from: 'testUpload.gradle'"
+    fi
+    rm -f "Flutter/testUpload.gradle"
+    echo -e "${projectModlue}" > "Flutter/testUpload.gradle"
+    ./gradlew uploadArchives
+}
+
+  buildApk
+  uploadAar
+  uploadProject
+
